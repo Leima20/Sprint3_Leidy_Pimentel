@@ -4,7 +4,6 @@ Nivell 1: Entorn i Ingesta Híbrida (Code-First)
 --Ejercicio 1: Arquitectura de Datos (Lógica vs. Física)
 
 /*Dataset Físico sprint3_silver */
-
 CREATE SCHEMA `sprint3-leidy-pimentel.sprint3_silver`
 OPTIONS(
   location = 'EU'
@@ -53,7 +52,7 @@ SELECT *
 FROM `sprint3-leidy-pimentel-v2.sprint3_bronze.companies_raw`
 LIMIT 5;
 
---Una vez creada la tabla companies_raw, se elimina la tabla_inspeccion_compoanies
+--Una vez creada la tabla companies_raw, se elimina la tabla_inspeccion_companies
 DROP TABLE `sprint3-leidy-pimentel-v2.sprint3_bronze.tabla_inspeccion_companies`;
 
 -- Se crea la tabla american_users_raw
@@ -79,12 +78,17 @@ OPTIONS (
   uris = ['gs://bootcamp-data-analytics-public/CRM/credit_cards.csv']
 );
 
+--Se verifica que se hayan creado todas las tablas:
+
+SELECT table_name, table_type
+FROM 'sprint3-leidy-pimentel-v2.sprint3_bronze.INFORMATION_SCHEMA.TABLES';
+
 -- Ejercicio 4: Arquitectura y Rendimiento. Materialitzación de Datos (Asistido por IA)
 
 --a) Materialitzación de Datos (Asistido por IA)
 
-CREATE OR REPLACE TABLE sprint3_bronze.transactions_raw_native AS
-SELECT * FROM sprint3_bronze.transactions_raw;
+CREATE OR REPLACE TABLE `sprint3-leidy-pimentel-v2.sprint3_bronze.transactions_raw_native` AS
+SELECT * FROM `sprint3-leidy-pimentel-v2.sprint3_bronze.transactions_raw`;
 
 
 /*b) Auditoria de Costos.*/
@@ -177,6 +181,7 @@ SELECT
     business_id,
     card_id,
     declined
+    user_id
 FROM 
     `sprint3-leidy-pimentel-v2.sprint3_bronze.transactions_raw_native`;
 
@@ -258,7 +263,7 @@ SELECT
     ANY_VALUE(c.company_name) AS company_name,
     ANY_VALUE(c.phone) AS phone,
     ANY_VALUE(c.country) AS country,
-    AVG(t.amount) AS average_purchase,
+    ROUND(AVG(t.amount), 2) AS average_purchase,
     CASE
         WHEN AVG(t.amount) > 260 THEN 'Premium'
         ELSE 'Standard'
